@@ -1,11 +1,15 @@
 package com.example
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.cbt.modules.auth.authRoutes
 import com.cbt.modules.auth.AuthRepository
 import com.cbt.modules.auth.AuthService
 import com.cbt.config.DatabaseConfig
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
@@ -20,6 +24,22 @@ fun Application.module() {
         json()
     }
 
+    install(Authentication) {
+        jwt("auth-jwt") {
+            verifier(
+                JWT.require(Algorithm.HMAC256("CBT_SUPER_SECRET"))
+                    .withAudience("cbt-users")
+                    .withIssuer("cbt-app")
+                    .build()
+            )
+            validate { credential ->
+                if (credential.payload.audience.contains("cbt-users")) {
+                    JWTPrincipal(credential.payload)
+                } else null
+            }
+        }
+    }
+
     val db = DatabaseConfig.init(environment.config)
     val authRepository = AuthRepository(db)
     val authService = AuthService(authRepository)
@@ -27,14 +47,36 @@ fun Application.module() {
     routing {
         println("ROUTING KELOAD 🔥")
 
-        get("/") {
-            call.respondText("Backend")
-        }
-
         get("/ping") {
             call.respondText("xirpl")
         }
 
         authRoutes(authService)
+
+        // PROTECTED 
+        authenticate("auth-jwt") {
+            // Me
+            get("/me") {
+                val principal = call.principal<JWTPrincipal>()
+                val userId = principal?.payload?.getClaim("userId")?.asString()
+                val role = principal?.payload?.getClaim("role")?.asString()
+                call.respond(mapOf("userId" to userId, "role" to role))
+            }
+
+//            // Users
+//            usersRoutes()
+//
+//            // Exam
+//            examRoutes()
+//
+//            // Questions
+//            questionsRoutes()
+//
+//            // Attempts
+//            attemptsRoutes()
+//
+//            // Analytics
+//            analyticsRoutes()
+        }
     }
 }

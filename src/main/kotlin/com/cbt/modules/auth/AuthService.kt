@@ -1,5 +1,6 @@
 package com.cbt.modules.auth
 
+import com.cbt.utils.JwtConfig
 import com.cbt.utils.PasswordUtil
 
 class AuthService(private val authRepository: AuthRepository) {
@@ -11,7 +12,10 @@ class AuthService(private val authRepository: AuthRepository) {
             return mapOf("error" to "Invalid password")
         }
 
+        val token = JwtConfig.generate(user)
+
         return mapOf(
+            "token" to token,
             "id" to user.id,
             "nama" to user.nama,
             "role" to user.role
