@@ -2,3 +2,11 @@ ktor:
   deployment:
     port: 8080
     host: "0.0.0.0"
+  application:
+    modules:
+      - com.example.ApplicationKt.module
+
+database:
+  url: "jdbc:postgresql://db.fhfwbhujnzoecmobqumi.supabase.co:5432/postgres?sslmode=require"
+  user: "postgres"
+  password: "K6Lx5tTD9UzIdkDI"

@@ -34,3 +34,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+src/main/resources/application.yaml
+.gradle
+build/
+*.class
+*.jar
+local.properties

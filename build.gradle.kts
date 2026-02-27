@@ -29,4 +29,12 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+    implementation("org.mindrot:jbcrypt:0.4")
+    implementation("io.ktor:ktor-server-auth-jwt")
+    // EXPOSED ORM
+    implementation("org.jetbrains.exposed:exposed-core:0.50.1")
+    implementation("org.jetbrains.exposed:exposed-dao:0.50.1")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.50.1")
+    // POSTGRES DRIVER
+    implementation("org.postgresql:postgresql:42.7.3")
 }
