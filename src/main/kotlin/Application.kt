@@ -6,6 +6,8 @@ import com.cbt.modules.auth.authRoutes
 import com.cbt.modules.auth.AuthRepository
 import com.cbt.modules.auth.AuthService
 import com.cbt.config.DatabaseConfig
+import com.cbt.utils.requireRole
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -37,6 +39,9 @@ fun Application.module() {
                     JWTPrincipal(credential.payload)
                 } else null
             }
+            challenge { _, _ ->
+                call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Token invalid or expired"))
+            }
         }
     }
 
@@ -51,32 +56,39 @@ fun Application.module() {
             call.respondText("xirpl")
         }
 
+        // PUBLIC
         authRoutes(authService)
 
-        // PROTECTED 
+        // PROTECTED
         authenticate("auth-jwt") {
-            // Me
             get("/me") {
-                val principal = call.principal<JWTPrincipal>()
+                val principal = call.authentication.principal<JWTPrincipal>()
                 val userId = principal?.payload?.getClaim("userId")?.asString()
                 val role = principal?.payload?.getClaim("role")?.asString()
                 call.respond(mapOf("userId" to userId, "role" to role))
             }
 
-//            // Users
-//            usersRoutes()
-//
-//            // Exam
-//            examRoutes()
-//
-//            // Questions
-//            questionsRoutes()
-//
-//            // Attempts
-//            attemptsRoutes()
-//
-//            // Analytics
-//            analyticsRoutes()
+            get("/admin/dashboard") {
+                if (!call.requireRole("admin")) return@get
+                call.respond(mapOf("message" to "Welcome Admin!"))
+            }
+
+            get("/siswa/dashboard") {
+                if (!call.requireRole("siswa")) return@get
+                call.respond(mapOf("message" to "Welcome Siswa!"))
+            }
+
+            get("/guru/dashboard") {
+                if (!call.requireRole("guru")) return@get
+                call.respond(mapOf("message" to "Welcome Guru!"))
+            }
+
+            // nanti tambah routes lain setelah dibuat
+            // usersRoutes()
+            // examRoutes()
+            // questionsRoutes()
+            // attemptsRoutes()
+            // analyticsRoutes()
         }
     }
 }
