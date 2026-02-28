@@ -5,5 +5,7 @@ data class UserEntity(
     val nama: String,
     val nisnNip: String,
     val passwordHash: String,
-    val role: String
+    val role: String,
+    val idKelas: String?,
+    val tanggalDibuat: String?
 )
