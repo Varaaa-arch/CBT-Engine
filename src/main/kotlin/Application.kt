@@ -8,6 +8,9 @@ import com.cbt.modules.auth.AuthService
 import com.cbt.modules.users.UserRepository
 import com.cbt.modules.users.UserService
 import com.cbt.modules.users.usersRoutes
+import com.cbt.modules.exams.ExamRepository
+import com.cbt.modules.exams.ExamService
+import com.cbt.modules.exams.examRoutes
 import com.cbt.config.DatabaseConfig
 import com.cbt.utils.requireRole
 import io.ktor.http.*
@@ -56,6 +59,9 @@ fun Application.module() {
     val userRepository = UserRepository(db)
     val userService = UserService(userRepository)
 
+    val examRepository = ExamRepository(db)
+    val examService = ExamService(examRepository)
+
     routing {
         println("ROUTING KELOAD 🔥")
 
@@ -90,11 +96,11 @@ fun Application.module() {
                 call.respond(mapOf("message" to "Welcome Guru!"))
             }
 
-            // USERS
+            // Route
             usersRoutes(userService)
+            examRoutes(examService)
 
-            // nanti tambah routes lain setelah dibuat
-            // examRoutes()
+
             // questionsRoutes()
             // attemptsRoutes()
             // analyticsRoutes()
