@@ -2,7 +2,9 @@ package com.cbt.modules.attemps
 
 import com.cbt.entities.AttemptEntity
 import com.cbt.entities.ExamSessionEntity
+import com.cbt.entities.HasilEntity
 import com.cbt.entities.StudentAnswerEntity
+import com.cbt.modules.analytics.AnalyticsRepository
 import com.cbt.modules.attemps.dto.AnswerRequest
 import com.cbt.modules.attemps.dto.AttemptResponse
 import com.cbt.modules.attemps.dto.ExamSessionResponse
@@ -11,7 +13,10 @@ import com.cbt.modules.attemps.dto.StudentAnswerResponse
 import java.time.LocalDateTime
 import java.util.UUID
 
-class AttemptService(private val attemptRepository: AttemptRepository) {
+class AttemptService(
+    private val attemptRepository: AttemptRepository,
+    private val analyticsRepository: AnalyticsRepository
+) {
 
     fun startAttempt(request: StartAttemptRequest, idUser: String, ipAddress: String?): AttemptResponse? {
         val now = LocalDateTime.now().toString().replace("T", " ").substring(0, 19)
@@ -62,14 +67,32 @@ class AttemptService(private val attemptRepository: AttemptRepository) {
 
     fun submitAttempt(attempId: String): AttemptResponse? {
         val now = LocalDateTime.now().toString().replace("T", " ").substring(0, 19)
+        val attempt = attemptRepository.findById(attempId) ?: return null
 
         // hitung score
         val score = attemptRepository.calculateScore(attempId)
+        val answers = attemptRepository.findAnswersByAttemptId(attempId)
 
-        // update score dulu
+        // hitung benar salah
+        val hitunganBenar = answers.count { it.idOpsiPilihan != null }
+        val hitunganSalah = answers.count { it.idOpsiPilihan == null }
+
+        // update score
         attemptRepository.updateScore(attempId, score)
 
-        // update status
+        // simpan ke tabel hasil
+        analyticsRepository.saveHasil(
+            HasilEntity(
+                id = "",
+                idUjian = attempt.idUjian,
+                idUser = attempt.idUser,
+                skor = score,
+                hitunganBenar = hitunganBenar,
+                hitunganSalah = hitunganSalah,
+                durasiMengerjakan = 0
+            )
+        )
+
         return attemptRepository.updateStatus(
             id = attempId,
             status = "selesai",

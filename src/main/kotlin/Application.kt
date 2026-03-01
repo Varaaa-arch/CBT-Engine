@@ -17,6 +17,9 @@ import com.cbt.modules.questions.questionRoutes
 import com.cbt.modules.attemps.AttemptRepository
 import com.cbt.modules.attemps.AttemptService
 import com.cbt.modules.attemps.attemptRoutes
+import com.cbt.modules.analytics.AnalyticsRepository
+import com.cbt.modules.analytics.AnalyticsService
+import com.cbt.modules.analytics.analyticsRoutes
 import com.cbt.config.DatabaseConfig
 import com.cbt.utils.requireRole
 import io.ktor.http.*
@@ -68,7 +71,9 @@ fun Application.module() {
     val questionRepository = QuestionRepository(db)
     val questionService = QuestionService(questionRepository)
     val attemptRepository = AttemptRepository(db)
-    val attemptService = AttemptService(attemptRepository)
+    val analyticsRepository = AnalyticsRepository(db)
+    val analyticsService = AnalyticsService(analyticsRepository)
+    val attemptService = AttemptService(attemptRepository, analyticsRepository)
 
     routing {
         println("ROUTING KELOAD 🔥")
@@ -109,7 +114,7 @@ fun Application.module() {
             examRoutes(examService)
             questionRoutes(questionService)
             attemptRoutes(attemptService)
-            // analyticsRoutes()
+            analyticsRoutes(analyticsService)
         }
     }
 }
