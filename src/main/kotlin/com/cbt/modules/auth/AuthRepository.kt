@@ -23,7 +23,9 @@ class AuthRepository(private val db: Database) {
                     nama = rs.getString("nama"),
                     nisnNip = rs.getString("nisn_nip"),
                     passwordHash = rs.getString("password_hash"),
-                    role = rs.getString("role")
+                    role = rs.getString("role"),
+                    idKelas = rs.getString("id_kelas"),
+                    tanggalDibuat = rs.getString("tanggal_dibuat")
                 )
             } else null
         }
