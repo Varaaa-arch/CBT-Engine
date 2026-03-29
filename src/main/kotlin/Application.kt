@@ -41,10 +41,12 @@ fun Application.module() {
         json()
     }
 
+    val jwtSecret = environment.config.property("jwt.secret").getString()
+
     install(Authentication) {
         jwt("auth-jwt") {
             verifier(
-                JWT.require(Algorithm.HMAC256("CBT_SUPER_SECRET"))
+                JWT.require(Algorithm.HMAC256(jwtSecret))
                     .withAudience("cbt-users")
                     .withIssuer("cbt-app")
                     .build()

@@ -35,9 +35,9 @@ out/
 ### VS Code ###
 .vscode/
 
-src/main/resources/application.yaml
-.gradle
-build/
+### Sensitive & Build Artifacts ###
 *.class
 *.jar
 local.properties
+.env
+src/main/resources/application.yaml

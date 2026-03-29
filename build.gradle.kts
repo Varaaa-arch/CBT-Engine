@@ -15,6 +15,12 @@ kotlin {
     jvmToolchain(17)
 }
 
+ktor {
+    fatJar {
+        archiveFileName.set("app.jar")
+    }
+}
+
 dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.host.common)
