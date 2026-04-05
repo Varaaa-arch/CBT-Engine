@@ -14,6 +14,13 @@ class ExamService(private val examRepository: ExamRepository) {
         return examRepository.findById(id)?.toResponse()
     }
 
+    // --- TAMBAHKAN FUNGSI INI ---
+    fun getByToken(token: String): ExamResponse? {
+        // Service manggil Repository buat nyari data mentah (Entity)
+        // Terus diubah jadi format JSON (Response) pake .toResponse()
+        return examRepository.findByToken(token)?.toResponse()
+    }
+
     fun create(request: CreateExamRequest, createdBy: String): ExamResponse? {
         val exam = ExamEntity(
             id = "",

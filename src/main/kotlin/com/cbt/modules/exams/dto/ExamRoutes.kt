@@ -12,6 +12,22 @@ import io.ktor.server.routing.*
 
 fun Route.examRoutes(examService: ExamService) {
     route("/exams") {
+
+        // --- ENDPOINT BARU UNTUK ANDROID (Siswa) ---
+        // Digunakan di DetailUjianActivity untuk validasi token soal
+        get("/check-token/{token}") {
+            val token = call.parameters["token"] ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Token is required"))
+
+            // Kita asumsikan di ExamService lo buat fungsi 'getByToken'
+            val exam = examService.getByToken(token)
+            if (exam != null) {
+                call.respond(exam)
+            } else {
+                call.respond(HttpStatusCode.NotFound, mapOf("error" to "Token ujian tidak valid atau tidak ditemukan"))
+            }
+        }
+
+        // --- ENDPOINT EXIST YANG SUDAH ADA ---
         get {
             val role = call.authentication.principal<JWTPrincipal>()?.payload?.getClaim("role")?.asString()
             if (role != "admin" && role != "guru") {

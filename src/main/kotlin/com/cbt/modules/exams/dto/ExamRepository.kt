@@ -10,6 +10,20 @@ import java.util.UUID
 
 class ExamRepository(private val db: Database) {
 
+    // --- FUNGSI BARU: Cari berdasarkan Token ---
+    fun findByToken(token: String): ExamEntity? {
+        return transaction(db) {
+            val connection = TransactionManager.current().connection.connection as Connection
+            // Pastikan nama kolom 'token' sesuai dengan di database lo
+            val stmt = connection.prepareStatement("SELECT * FROM ujian WHERE token = ?")
+            stmt.setString(1, token)
+            val rs = stmt.executeQuery()
+            if (rs.next()) {
+                mapResultSetToEntity(rs)
+            } else null
+        }
+    }
+
     fun findAll(): List<ExamEntity> {
         return transaction(db) {
             val connection = TransactionManager.current().connection.connection as Connection
@@ -17,21 +31,7 @@ class ExamRepository(private val db: Database) {
             val rs = stmt.executeQuery()
             val exams = mutableListOf<ExamEntity>()
             while (rs.next()) {
-                exams.add(
-                    ExamEntity(
-                        id = rs.getString("id"),
-                        judul = rs.getString("judul"),
-                        idMapel = rs.getString("id_mapel"),
-                        durasi = rs.getInt("durasi"),
-                        totalSoal = rs.getInt("total_soal"),
-                        startTime = rs.getString("start_time"),
-                        endTime = rs.getString("end_time"),
-                        status = rs.getString("status"),
-                        soalRandom = rs.getBoolean("soal_random"),
-                        jawabanRandom = rs.getBoolean("jawaban_random"),
-                        createdBy = rs.getString("created_by")
-                    )
-                )
+                exams.add(mapResultSetToEntity(rs))
             }
             exams
         }
@@ -44,26 +44,32 @@ class ExamRepository(private val db: Database) {
             stmt.setObject(1, UUID.fromString(id))
             val rs = stmt.executeQuery()
             if (rs.next()) {
-                ExamEntity(
-                    id = rs.getString("id"),
-                    judul = rs.getString("judul"),
-                    idMapel = rs.getString("id_mapel"),
-                    durasi = rs.getInt("durasi"),
-                    totalSoal = rs.getInt("total_soal"),
-                    startTime = rs.getString("start_time"),
-                    endTime = rs.getString("end_time"),
-                    status = rs.getString("status"),
-                    soalRandom = rs.getBoolean("soal_random"),
-                    jawabanRandom = rs.getBoolean("jawaban_random"),
-                    createdBy = rs.getString("created_by")
-                )
+                mapResultSetToEntity(rs)
             } else null
         }
+    }
+
+    // Fungsi helper biar gak ngetik ulang mapping data berkali-kali
+    private fun mapResultSetToEntity(rs: java.sql.ResultSet): ExamEntity {
+        return ExamEntity(
+            id = rs.getString("id"),
+            judul = rs.getString("judul"),
+            idMapel = rs.getString("id_mapel"),
+            durasi = rs.getInt("durasi"),
+            totalSoal = rs.getInt("total_soal"),
+            startTime = rs.getString("start_time"),
+            endTime = rs.getString("end_time"),
+            status = rs.getString("status"),
+            soalRandom = rs.getBoolean("soal_random"),
+            jawabanRandom = rs.getBoolean("jawaban_random"),
+            createdBy = rs.getString("created_by")
+        )
     }
 
     fun create(exam: ExamEntity, createdBy: String): ExamEntity? {
         return transaction(db) {
             val connection = TransactionManager.current().connection.connection as Connection
+            // JANGAN LUPA: Tambahkan kolom 'token' di query INSERT lo nanti kalau belum ada
             val stmt = connection.prepareStatement(
                 """INSERT INTO ujian (judul, id_mapel, durasi, total_soal, start_time, end_time, status, soal_random, jawaban_random, created_by) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *"""
@@ -80,19 +86,7 @@ class ExamRepository(private val db: Database) {
             stmt.setObject(10, UUID.fromString(createdBy))
             val rs = stmt.executeQuery()
             if (rs.next()) {
-                ExamEntity(
-                    id = rs.getString("id"),
-                    judul = rs.getString("judul"),
-                    idMapel = rs.getString("id_mapel"),
-                    durasi = rs.getInt("durasi"),
-                    totalSoal = rs.getInt("total_soal"),
-                    startTime = rs.getString("start_time"),
-                    endTime = rs.getString("end_time"),
-                    status = rs.getString("status"),
-                    soalRandom = rs.getBoolean("soal_random"),
-                    jawabanRandom = rs.getBoolean("jawaban_random"),
-                    createdBy = rs.getString("created_by")
-                )
+                mapResultSetToEntity(rs)
             } else null
         }
     }
@@ -116,19 +110,7 @@ class ExamRepository(private val db: Database) {
             stmt.setObject(10, UUID.fromString(id))
             val rs = stmt.executeQuery()
             if (rs.next()) {
-                ExamEntity(
-                    id = rs.getString("id"),
-                    judul = rs.getString("judul"),
-                    idMapel = rs.getString("id_mapel"),
-                    durasi = rs.getInt("durasi"),
-                    totalSoal = rs.getInt("total_soal"),
-                    startTime = rs.getString("start_time"),
-                    endTime = rs.getString("end_time"),
-                    status = rs.getString("status"),
-                    soalRandom = rs.getBoolean("soal_random"),
-                    jawabanRandom = rs.getBoolean("jawaban_random"),
-                    createdBy = rs.getString("created_by")
-                )
+                mapResultSetToEntity(rs)
             } else null
         }
     }
